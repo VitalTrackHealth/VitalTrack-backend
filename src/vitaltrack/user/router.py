@@ -110,12 +110,12 @@ async def login_user(
     return {"message": "login successful", "data": {}}
 
 
-@router.post(
+@router.get(
     "/profile",
     response_model=schemas.UserProfileResponse,
 )
 async def profile(
-    email: Annotated[pydantic.EmailStr, fastapi.Body(embed=True)],
+    email: pydantic.EmailStr,
     db_manager: core.dependencies.database_manager_dep,
 ):
     user_in_db = await services.get_user(db_manager, {"email": email})

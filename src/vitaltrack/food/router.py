@@ -23,9 +23,16 @@ user_router = fastapi.APIRouter()
     response_model_by_alias=False,
 )
 async def search(ingredient="", brand=""):
-    food_search_url = f"{config.FOOD_DATABASE_PARSER_URL}&ingr={ingredient}&brand{brand}&nutrition-type=logging"
     # TODO: Error handling
-    res = httpx.get(food_search_url)
+    # TODO: Add validation to make sure ingredient of brand exists
+    res = httpx.get(
+        config.FOOD_DATABASE_PARSER_URL,
+        params={
+            "ingr": ingredient,
+            "brand": brand,
+            "nutrition-type": "logging",
+        },
+    )
     res_dict = res.json()
 
     food_list = []
@@ -47,11 +54,19 @@ async def search(ingredient="", brand=""):
 async def nutrients(
     ingredients: Annotated[schemas.IngredientsInRequest, fastapi.Body(embed=False)]
 ):
-    food_search_url = f"{config.FOOD_DATABASE_NUTRIENTS_URL}"
     # TODO: Error handling
-    res = httpx.post(food_search_url, json=ingredients.model_dump(by_alias=True))
+
+    food_search_url = f"{config.FOOD_DATABASE_NUTRIENTS_URL}"
+    res = httpx.post(
+        food_search_url,
+        # TODO: Edamam doesn't allow multiple ingredients in request?
+        json={
+            "measure_uri": "",
+            "qualifiers": [],
+            **ingredients.model_dump(by_alias=True),
+        },
+    )
     res_dict = res.json()
-    # TODO: Edamam doesn't allow multiple ingredients in request?
 
     return {
         "message": "nutrients queried",

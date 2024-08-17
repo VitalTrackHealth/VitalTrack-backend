@@ -47,8 +47,6 @@ class MultipleFoodsInResponse(core.schemas.ResponseBase):
 
 class IngredientBase(core.schemas.SchemaBase):
     quantity: int = pydantic.Field(...)
-    measure_uri: str = pydantic.Field(alias="measureURI")
-    qualifiers: list[str] = pydantic.Field(...)
     food_id: str = pydantic.Field(alias="foodId")
 
 
