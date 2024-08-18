@@ -19,7 +19,7 @@ user_router = fastapi.APIRouter()
 
 @router.get(
     "/search",
-    response_model=schemas.FoodsInResponse,
+    response_model=schemas.FoodsInSearchResponse,
     response_model_by_alias=False,
 )
 async def search(ingredient="", brand=""):
@@ -35,18 +35,18 @@ async def search(ingredient="", brand=""):
     )
     res_dict = res.json()
 
-    edamam_food_list = []
+    all_food_list = []
 
-    edamam_food_list.append(
+    all_food_list.append(
         schemas.FoodEdamam(**res_dict["parsed"][0]["food"]).model_dump()
     )
 
     for food in res_dict["hints"]:
-        edamam_food_list.append(schemas.FoodEdamam(**food["food"]).model_dump())
+        all_food_list.append(schemas.FoodEdamam(**food["food"]).model_dump())
 
     return {
         "message": f"food search returned {len(res_dict['parsed']) + len(res_dict['hints']) } items",
-        "data": edamam_food_list,
+        "data": {"suggested": [], "all": all_food_list},
     }
 
 
@@ -55,12 +55,8 @@ async def search(ingredient="", brand=""):
     response_model=schemas.NutrientsInResponse,
     response_model_by_alias=False,
 )
-async def nutrients(
-    ingredients: Annotated[schemas.IngredientsInRequest, fastapi.Body()]
-):
+async def nutrients(ingredients: schemas.IngredientsInRequest):
     # TODO: Error handling
-
-    print(f"{ingredients.model_dump(by_alias=False)=}")
 
     res = httpx.post(
         config.EDAMAM_NUTRIENTS_URL,

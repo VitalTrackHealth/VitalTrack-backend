@@ -54,8 +54,12 @@ class MeasureEdamam(core.schemas.SchemaBase):
     qualified: Optional[list[dict[Any, Any]]] = pydantic.Field()
 
 
-class FoodsInResponse(core.schemas.ResponseBase):
-    data: list[FoodEdamam] = pydantic.Field(...)
+class FoodsInSearchResponse(core.schemas.ResponseBase):
+    class _OrganizedFoods(core.schemas.SchemaBase):
+        suggested: list[FoodEdamam] = pydantic.Field(...)
+        all: list[FoodEdamam] = pydantic.Field(...)
+
+    data: _OrganizedFoods = pydantic.Field(...)
 
 
 class IngredientsInRequest(pydantic.BaseModel):
