@@ -27,10 +27,17 @@ async def register_provider(
     provider: schemas.ProviderInRegister,
     db_manager: core.dependencies.database_manager_dep,
 ):
-    # TODO: Verify provider doesn't exist
+    provider_in_req_dict = provider.model_dump()
+
+    provider_already_exists = await services.get_provider(
+        db_manager, {"email": provider_in_req_dict["email"]}
+    )
+    if provider_already_exists:
+        raise fastapi.HTTPException(
+            status_code=400, detail="user with this email already exists"
+        )
 
     # Generate provider password hash
-    provider_in_req_dict = provider.model_dump()
     salt = core.generate_salt()
     password_hash = core.get_password_hash(
         provider_in_req_dict.pop("password").encode("utf-8"),

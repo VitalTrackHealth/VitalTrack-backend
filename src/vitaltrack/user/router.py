@@ -39,10 +39,17 @@ async def register_user(
     Returns:
         TODO: Add return
     """
-    # TODO: Verify user doesn't exist
+    user_in_req_dict = user.model_dump()
+
+    user_already_exists = await services.get_user(
+        db_manager, {"email": user_in_req_dict["email"]}
+    )
+    if user_already_exists:
+        raise fastapi.HTTPException(
+            status_code=400, detail="user with this email already exists"
+        )
 
     # Generate user password hash
-    user_in_req_dict = user.model_dump()
     salt = core.utils.generate_salt()
     password_hash = core.utils.get_password_hash(
         user_in_req_dict.pop("password").encode("utf-8"),
