@@ -11,6 +11,7 @@ import pydantic
 
 from vitaltrack import config
 from vitaltrack import core
+from vitaltrack import user
 
 from . import models
 from . import schemas
@@ -88,11 +89,33 @@ async def profile(
     db_manager: core.dependencies.database_manager_dep,
 ):
     provider_in_db = await services.get_provider(db_manager, {"email": email})
-
     if not provider_in_db:
         raise fastapi.HTTPException(status_code=400, detail="incorrect email")
 
     return {
         "message": "",
         "data": provider_in_db.model_dump(),
+    }
+
+
+@router.get(
+    "/patients",
+    response_model=schemas.PatientsListResponse,
+)
+async def profile(
+    email: pydantic.EmailStr,
+    db_manager: core.dependencies.database_manager_dep,
+):
+    provider_in_db = await services.get_provider(db_manager, {"email": email})
+    if not provider_in_db:
+        raise fastapi.HTTPException(status_code=400, detail="incorrect email")
+
+    patient_list = []
+    for user_id in provider_in_db.users:
+        user_in_db = await user.services.get_user(db_manager, {"_id": user_id})
+        patient_list.append(user.schemas.UserProfile(**user_in_db.model_dump()))
+
+    return {
+        "message": f"{len(patient_list)} patient(s) found",
+        "data": patient_list,
     }

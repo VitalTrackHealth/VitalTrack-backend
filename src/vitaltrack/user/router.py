@@ -119,7 +119,6 @@ async def profile(
     db_manager: core.dependencies.database_manager_dep,
 ):
     user_in_db = await services.get_user(db_manager, {"email": email})
-
     if not user_in_db:
         raise fastapi.HTTPException(status_code=400, detail="incorrect email")
 
