@@ -22,10 +22,10 @@ MONGO_DB_DATABASE = os.getenv("MONGO_DB_DATABASE")
 MIN_CONNECTIONS_COUNT = 10
 MAX_CONNECTIONS_COUNT = 10
 
-FOOD_DATABASE_API_KEY = "6db423635db56cd0fdf46cce1c5edfb3"
-FOOD_DATABASE_API_ID = "750c3845"
-FOOD_DATABASE_PARSER_URL = f"https://api.edamam.com/api/food-database/v2/parser?app_id={FOOD_DATABASE_API_ID}&app_key={FOOD_DATABASE_API_KEY}"
-FOOD_DATABASE_NUTRIENTS_URL = f"https://api.edamam.com/api/food-database/v2/nutrients?app_id={FOOD_DATABASE_API_ID}&app_key={FOOD_DATABASE_API_KEY}"
+EDAMAM_API_ID = os.getenv("EDAMAM_API_ID")
+EDAMAM_API_KEY = os.getenv("EDAMAM_API_KEY")
+EDAMAM_PARSER_URL = f"https://api.edamam.com/api/food-database/v2/parser?app_id={EDAMAM_API_ID}&app_key={EDAMAM_API_KEY}"
+EDAMAM_NUTRIENTS_URL = f"https://api.edamam.com/api/food-database/v2/nutrients?app_id={EDAMAM_API_ID}&app_key={EDAMAM_API_KEY}"
 
 USERS_COLLECTION_NAME = "users"
 PROVIDERS_COLLECTION_NAME = "providers"

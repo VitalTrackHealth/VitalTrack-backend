@@ -133,7 +133,7 @@ async def profile(
 
 @router.post(
     "/add-food",
-    response_model=food.schemas.MultipleFoodIdsInResponse,
+    response_model=food.schemas.FoodIdsInResponse,
 )
 async def add_food(
     email: Annotated[pydantic.EmailStr, fastapi.Body()],

@@ -12,7 +12,8 @@ from typing import Optional
 from vitaltrack import core
 
 
-class FoodBase(core.schemas.SchemaBase):
+class FoodEdamam(core.schemas.SchemaBase):
+    # https://developer.edamam.com/food-database-api-docs
     food_id: str = pydantic.Field(alias="foodId")
     uri: Optional[pydantic.HttpUrl] = pydantic.Field(default=None)
     label: Optional[str] = pydantic.Field(default=None)
@@ -25,34 +26,44 @@ class FoodBase(core.schemas.SchemaBase):
         alias="foodContentsLabel", default=None
     )
     image: Optional[str] = pydantic.Field(default=None)
-    serving_sizes: Optional[dict[str, Any]] = pydantic.Field(
+    serving_sizes: Optional[list[QuantityEdamam]] = pydantic.Field(
         alias="servingSizes", default=None
     )
-    measure: Optional[dict[str, Any]] = pydantic.Field(default=None)
     servings_per_container: Optional[float] = pydantic.Field(
         alias="servingsPerContainer", default=None
     )
 
 
-class MultipleFoodIdsInResponse(core.schemas.ResponseBase): ...
+class QuantityEdamam(core.schemas.SchemaBase):
+    uri: Optional[pydantic.HttpUrl] = pydantic.Field(default=None)
+    label: Optional[str] = pydantic.Field(default=None)
+    quantity: Optional[int | float] = pydantic.Field()
 
 
-class FoodInResponse(core.schemas.ResponseBase):
-    data: FoodBase = pydantic.Field(...)
-
-
-class MultipleFoodsInResponse(core.schemas.ResponseBase):
-    data: list[FoodBase] = pydantic.Field(...)
-
-
-class IngredientBase(core.schemas.SchemaBase):
-    quantity: int = pydantic.Field(...)
+class IngredientsEdamam(core.schemas.SchemaBase):
+    quantity: int | float = pydantic.Field()
+    measure_uri: Optional[int] = pydantic.Field(alias="measureURI", default="")
+    qualifiers: Optional[list[str]] = pydantic.Field(default=[])
     food_id: str = pydantic.Field(alias="foodId")
 
 
+class MeasureEdamam(core.schemas.SchemaBase):
+    uri: Optional[pydantic.HttpUrl] = pydantic.Field(default=None)
+    label: Optional[str] = pydantic.Field(default=None)
+    weight: Optional[float] = pydantic.Field(default=None)
+    qualified: Optional[list[dict[Any, Any]]] = pydantic.Field()
+
+
+class FoodsInResponse(core.schemas.ResponseBase):
+    data: list[FoodEdamam] = pydantic.Field(...)
+
+
 class IngredientsInRequest(pydantic.BaseModel):
-    ingredients: list[IngredientBase] = pydantic.Field(...)
+    ingredients: list[IngredientsEdamam] = pydantic.Field(...)
 
 
 class NutrientsInResponse(core.schemas.ResponseBase):
     data: dict[str, Any] = pydantic.Field(...)
+
+
+class FoodIdsInResponse(core.schemas.ResponseBase): ...
