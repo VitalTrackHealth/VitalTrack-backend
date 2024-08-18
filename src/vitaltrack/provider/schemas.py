@@ -18,15 +18,20 @@ class ProviderBase(core.schemas.SchemaBase):
     phone_number: str = pydantic.Field(...)
 
 
+class ProviderProfile(ProviderBase):
+    provider_code: str = pydantic.Field(...)
+
+
+class ProviderProfileResponse(core.schemas.ResponseBase):
+    data: ProviderProfile = pydantic.Field(...)
+
+
 class ProviderInRegister(ProviderBase):
     password: str = pydantic.Field(...)
 
 
 class ProviderRegisterResponse(core.schemas.ResponseBase):
-    class _ProviderWithCode(ProviderBase):
-        provider_code: str = pydantic.Field(...)
-
-    data: _ProviderWithCode = pydantic.Field(...)
+    data: ProviderProfile = pydantic.Field(...)
 
 
 class ProviderInLogin(core.schemas.SchemaBase):

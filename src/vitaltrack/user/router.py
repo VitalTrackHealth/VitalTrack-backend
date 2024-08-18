@@ -121,9 +121,7 @@ async def profile(
     user_in_db = await services.get_user(db_manager, {"email": email})
 
     if not user_in_db:
-        raise fastapi.HTTPException(
-            status_code=400, detail="incorrect email or password"
-        )
+        raise fastapi.HTTPException(status_code=400, detail="incorrect email")
 
     return {
         "message": "",

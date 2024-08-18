@@ -7,6 +7,7 @@ from __future__ import annotations
 import uuid
 
 import fastapi
+import pydantic
 
 from vitaltrack import config
 from vitaltrack import core
@@ -76,3 +77,22 @@ async def login_provider(
         )
 
     return {"message": "login successful", "data": {}}
+
+
+@router.get(
+    "/profile",
+    response_model=schemas.ProviderProfileResponse,
+)
+async def profile(
+    email: pydantic.EmailStr,
+    db_manager: core.dependencies.database_manager_dep,
+):
+    provider_in_db = await services.get_provider(db_manager, {"email": email})
+
+    if not provider_in_db:
+        raise fastapi.HTTPException(status_code=400, detail="incorrect email")
+
+    return {
+        "message": "",
+        "data": provider_in_db.model_dump(),
+    }
