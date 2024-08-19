@@ -11,6 +11,7 @@ import uuid
 import pydantic
 
 from vitaltrack import core
+from vitaltrack import food
 
 
 class UserInDB(core.models.ModelInDBBase, core.models.AuthMixin):
@@ -35,4 +36,4 @@ class UserInDB(core.models.ModelInDBBase, core.models.AuthMixin):
     email: pydantic.EmailStr = pydantic.Field(...)
     conditions: list[str] = pydantic.Field(...)
     provider: list[uuid.UUID] = pydantic.Field(default=[])
-    foods: list[str] = pydantic.Field(default=[])
+    foods: list[food.models.FoodInDB] = pydantic.Field(default=[])

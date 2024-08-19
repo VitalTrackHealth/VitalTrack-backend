@@ -9,6 +9,7 @@ from typing import Any
 import pydantic
 
 from vitaltrack import core
+from vitaltrack import food
 
 
 class UserBase(core.schemas.SchemaBase):
@@ -34,7 +35,7 @@ class UserBase(core.schemas.SchemaBase):
 
 
 class UserProfile(UserBase):
-    foods: list[str] = pydantic.Field(default=[])
+    foods: list[food.models.FoodInDB] = pydantic.Field(default=[])
 
 
 class UserProfileResponse(core.schemas.ResponseBase):

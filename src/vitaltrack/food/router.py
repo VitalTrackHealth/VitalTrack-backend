@@ -37,9 +37,8 @@ async def search(ingredient="", brand=""):
 
     all_food_list = []
 
-    all_food_list.append(
-        schemas.FoodEdamam(**res_dict["parsed"][0]["food"]).model_dump()
-    )
+    for food in res_dict["parsed"]:
+        all_food_list.append(schemas.FoodEdamam(**food["food"]).model_dump())
 
     for food in res_dict["hints"]:
         all_food_list.append(schemas.FoodEdamam(**food["food"]).model_dump())

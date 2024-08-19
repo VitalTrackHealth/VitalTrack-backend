@@ -144,8 +144,9 @@ async def add_food(
     food_ids: Annotated[list[str], fastapi.Body()],
     db_manager: core.dependencies.database_manager_dep,
 ):
+    foods = [food.models.FoodInDB(food_id=food_id).model_dump() for food_id in food_ids]
     result = await db_manager.db[config.USERS_COLLECTION_NAME].update_one(
-        {"email": email}, {"$addToSet": {"foods": {"$each": food_ids}}}
+        {"email": email}, {"$push": {"foods": {"$each": foods}}}
     )
 
     if result.matched_count == 0:

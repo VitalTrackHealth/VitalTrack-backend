@@ -2,6 +2,6 @@
 Food module.
 """
 
-from .models import *
-from .router import *
-from .schemas import *
+from . import models
+from . import router
+from . import schemas
