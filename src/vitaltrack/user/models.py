@@ -7,6 +7,7 @@ User models interactions with MongoDB.
 from __future__ import annotations
 
 import uuid
+from typing import Any
 
 import pydantic
 
@@ -37,3 +38,9 @@ class UserInDB(core.models.ModelInDBBase, core.models.AuthMixin):
     conditions: list[str] = pydantic.Field(...)
     provider: list[uuid.UUID] = pydantic.Field(default=[])
     foods: list[food.models.FoodInDB] = pydantic.Field(default=[])
+    body_measurements: BodyMeasurements = pydantic.Field(...)
+
+
+class BodyMeasurements(core.models.ModelInDBBase):
+    height: float = pydantic.Field(description="Height in centimeters")
+    weight: float = pydantic.Field(description="Weight in kilograms")

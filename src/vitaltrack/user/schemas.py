@@ -32,10 +32,17 @@ class UserBase(core.schemas.SchemaBase):
     phone_number: str = pydantic.Field(...)
     email: pydantic.EmailStr = pydantic.Field(...)
     conditions: list[str] = pydantic.Field(...)
+    body_measurements: BodyMeasurements = pydantic.Field()
+
+
+class BodyMeasurements(core.schemas.SchemaBase):
+    height: float = pydantic.Field(description="Height in centimeters")
+    weight: float = pydantic.Field(description="Weight in kilograms")
 
 
 class UserProfile(UserBase):
     foods: list[food.models.FoodInDB] = pydantic.Field(default=[])
+    goals: dict[str, Any] = pydantic.Field(default={})
 
 
 class UserProfileResponse(core.schemas.ResponseBase):
