@@ -50,8 +50,62 @@ class IngredientsEdamam(core.schemas.SchemaBase):
 class MeasureEdamam(core.schemas.SchemaBase):
     uri: Optional[pydantic.HttpUrl] = pydantic.Field(default=None)
     label: Optional[str] = pydantic.Field(default=None)
-    weight: Optional[float] = pydantic.Field(default=None)
-    qualified: Optional[list[dict[Any, Any]]] = pydantic.Field()
+    weight: Optional[float] = pydantic.Field(default=100, description="Weight in grams")
+    qualified: Optional[list[dict[Any, Any]]] = pydantic.Field(default=[])
+
+
+class FoodBase(core.schemas.SchemaBase):
+    food_id: str = pydantic.Field()
+    label: str = pydantic.Field(default=None)
+    known_as: str = pydantic.Field(default=None)
+    brand: Optional[str] = pydantic.Field(default=None)
+    serving: float = pydantic.Field(default=100, description="Serving size in grams")
+    nutrients: NutrientsBase = pydantic.Field(default=None)
+
+
+class FoodFull(FoodBase):
+    nutrients: NutrientsFull = pydantic.Field(default=None)
+
+
+class NutrientsBase(core.schemas.SchemaBase):
+    CALORIES: float = pydantic.Field()
+    CARBOHYDRATE: float = pydantic.Field()
+    FAT: float = pydantic.Field()
+    PROTEIN: float = pydantic.Field()
+
+
+class NutrientsFull(NutrientsBase):
+    CALCIUM: float = pydantic.Field()
+    CARBOHYDRATE_NET: float = pydantic.Field()
+    CHOLESTEROL: float = pydantic.Field()
+    FATTY_ACIDS_MONOUNSATURATED: float = pydantic.Field()
+    FATTY_ACIDS_POLYUNSATURATED: float = pydantic.Field()
+    FATTY_ACIDS_SATURATED: float = pydantic.Field()
+    FATTY_ACIDS_TRANS: float = pydantic.Field()
+    FIBER: float = pydantic.Field()
+    FOLATE_DFE: float = pydantic.Field()
+    FOLATE_FOOD: float = pydantic.Field()
+    FOLIC_ACID: float = pydantic.Field()
+    IRON: float = pydantic.Field()
+    MAGNESIUM: float = pydantic.Field()
+    NIACIN: float = pydantic.Field()
+    PHOSPHORUS: float = pydantic.Field()
+    POTASSIUM: float = pydantic.Field()
+    RIBOFLAVIN: float = pydantic.Field()
+    SODIUM: float = pydantic.Field()
+    SUGAR_ALCOHOLS: float = pydantic.Field()
+    SUGARS_ADDED: float = pydantic.Field()
+    SUGARS: float = pydantic.Field()
+    THIAMIN: float = pydantic.Field()
+    VITAMIN_A_RAE: float = pydantic.Field()
+    VITAMIN_B12: float = pydantic.Field()
+    VITAMIN_B6: float = pydantic.Field()
+    VITAMIN_C: float = pydantic.Field()
+    VITAMIN_D: float = pydantic.Field()
+    VITAMIN_E: float = pydantic.Field()
+    VITAMIN_K: float = pydantic.Field()
+    WATER: float = pydantic.Field()
+    ZINC: float = pydantic.Field()
 
 
 class FoodsInSearchResponse(core.schemas.ResponseBase):

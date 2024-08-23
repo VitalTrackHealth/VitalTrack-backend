@@ -6,7 +6,7 @@ authors = [
     {name = "Daniel Williams", email = "danielfwilliams@protonmail.com"},
 ]
 dependencies = [
-    "fastapi[standard]>=0.112.0",
+    "fastapi[standard==0.112.0",
     "python-dotenv>=1.0.1",
     "motor>=3.5.1",
     "pydantic>=2.8.2",
@@ -33,4 +33,7 @@ lint = [
 [tool.pdm.scripts]
 dev = """
     fastapi dev src/vitaltrack/main.py
+"""
+prod =  """
+    fastapi run src/vitaltrack/main.py
 """
