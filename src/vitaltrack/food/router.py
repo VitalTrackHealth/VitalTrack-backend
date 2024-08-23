@@ -19,8 +19,7 @@ router = fastapi.APIRouter()
 
 @router.get(
     "/search",
-    # response_model=schemas.FoodsInSearchResponse,
-    # response_model_by_alias=False,
+    response_model=schemas.FoodsInSearchResponse,
 )
 async def search(ingredient="", brand=""):
     # TODO: Error handling
@@ -46,25 +45,13 @@ async def search(ingredient="", brand=""):
         # Find out serving size
         # Parser response returns macros per 100g
         # See: https://developer.edamam.com/api/faq
-        macros_per_gram = {
-            "CALORIES": food_edamam.nutrients.get(
-                utils.EDAMAM_NUTRIENT_MAPPING["CALORIES"], 0.0
-            )
-            / 100,
-            "PROTEIN": food_edamam.nutrients.get(
-                utils.EDAMAM_NUTRIENT_MAPPING["PROTEIN"], 0.0
-            )
-            / 100,
-            "FAT": food_edamam.nutrients.get(utils.EDAMAM_NUTRIENT_MAPPING["FAT"], 0.0)
-            / 100,
-            "CARBOHYDRATE": food_edamam.nutrients.get(
-                utils.EDAMAM_NUTRIENT_MAPPING["CARBOHYDRATE"], 0.0
-            )
-            / 100,
-        }
-        macros_per_serving = {**macros_per_gram}
-        for macro_key in macros_per_serving:
-            macros_per_serving[macro_key] *= food_serving_measure_edamam.weight
+        macros_per_serving = {}
+        for nutrient_code, marco_per_100g in food_edamam.nutrients.items():
+            nutrient_name = utils.get_nutrient_name_from_edamam_code(nutrient_code)
+            macros_per_serving[nutrient_name] = (
+                marco_per_100g / 100
+            ) * food_serving_measure_edamam.weight
+
         basic_nutrients = schemas.NutrientsBase(**macros_per_serving)
 
         all_food_list.append(
@@ -84,7 +71,6 @@ async def search(ingredient="", brand=""):
 @router.post(
     "/nutrients",
     response_model=schemas.NutrientsInResponse,
-    response_model_by_alias=False,
 )
 async def nutrients(ingredients: schemas.IngredientsInRequest):
     # TODO: Error handling
@@ -96,7 +82,20 @@ async def nutrients(ingredients: schemas.IngredientsInRequest):
     )
     res_dict = res.json()
 
+    food_serving_measure_edamam = schemas.MeasureEdamam(weight=res_dict["totalWeight"])
+
+    nutrients_per_100g = {}
+    for nutrient_code, marco_per_serving in res_dict["totalNutrients"].items():
+        nutrient_name = utils.get_nutrient_name_from_edamam_code(nutrient_code)
+        nutrients_per_100g[nutrient_name] = (
+            marco_per_serving["quantity"] / food_serving_measure_edamam.weight
+        ) * 100
+
     return {
-        "message": "nutrients queried",
-        "data": res_dict,
+        "message": "nutrients per 100 grams",
+        "data": {
+            "nutrients": nutrients_per_100g,
+            "health_labels": res_dict.get("healthLabels"),
+            "cautions": res_dict.get("cautions"),
+        },
     }

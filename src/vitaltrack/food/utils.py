@@ -40,3 +40,13 @@ EDAMAM_NUTRIENT_MAPPING = {
     "WATER": "WATER",
     "ZINC": "ZN",
 }
+
+REVERSE_EDAMAM_NUTRIENT_MAPPING = {v: k for k, v in EDAMAM_NUTRIENT_MAPPING.items()}
+
+
+def get_edamam_nutrient_code(nutrient_name: str):
+    return EDAMAM_NUTRIENT_MAPPING.get(nutrient_name, None)
+
+
+def get_nutrient_name_from_edamam_code(nutrient_code: str):
+    return REVERSE_EDAMAM_NUTRIENT_MAPPING.get(nutrient_code, None)

@@ -75,43 +75,43 @@ class NutrientsBase(core.schemas.SchemaBase):
 
 
 class NutrientsFull(NutrientsBase):
-    CALCIUM: float = pydantic.Field()
-    CARBOHYDRATE_NET: float = pydantic.Field()
-    CHOLESTEROL: float = pydantic.Field()
-    FATTY_ACIDS_MONOUNSATURATED: float = pydantic.Field()
-    FATTY_ACIDS_POLYUNSATURATED: float = pydantic.Field()
-    FATTY_ACIDS_SATURATED: float = pydantic.Field()
-    FATTY_ACIDS_TRANS: float = pydantic.Field()
-    FIBER: float = pydantic.Field()
-    FOLATE_DFE: float = pydantic.Field()
-    FOLATE_FOOD: float = pydantic.Field()
-    FOLIC_ACID: float = pydantic.Field()
-    IRON: float = pydantic.Field()
-    MAGNESIUM: float = pydantic.Field()
-    NIACIN: float = pydantic.Field()
-    PHOSPHORUS: float = pydantic.Field()
-    POTASSIUM: float = pydantic.Field()
-    RIBOFLAVIN: float = pydantic.Field()
-    SODIUM: float = pydantic.Field()
-    SUGAR_ALCOHOLS: float = pydantic.Field()
-    SUGARS_ADDED: float = pydantic.Field()
-    SUGARS: float = pydantic.Field()
-    THIAMIN: float = pydantic.Field()
-    VITAMIN_A_RAE: float = pydantic.Field()
-    VITAMIN_B12: float = pydantic.Field()
-    VITAMIN_B6: float = pydantic.Field()
-    VITAMIN_C: float = pydantic.Field()
-    VITAMIN_D: float = pydantic.Field()
-    VITAMIN_E: float = pydantic.Field()
-    VITAMIN_K: float = pydantic.Field()
-    WATER: float = pydantic.Field()
-    ZINC: float = pydantic.Field()
+    CALCIUM: Optional[float] = pydantic.Field(default=None)
+    CARBOHYDRATE_NET: Optional[float] = pydantic.Field(default=None)
+    CHOLESTEROL: Optional[float] = pydantic.Field(default=None)
+    FATTY_ACIDS_MONOUNSATURATED: Optional[float] = pydantic.Field(default=None)
+    FATTY_ACIDS_POLYUNSATURATED: Optional[float] = pydantic.Field(default=None)
+    FATTY_ACIDS_SATURATED: Optional[float] = pydantic.Field(default=None)
+    FATTY_ACIDS_TRANS: Optional[float] = pydantic.Field(default=None)
+    FIBER: Optional[float] = pydantic.Field(default=None)
+    FOLATE_DFE: Optional[float] = pydantic.Field(default=None)
+    FOLATE_FOOD: Optional[float] = pydantic.Field(default=None)
+    FOLIC_ACID: Optional[float] = pydantic.Field(default=None)
+    IRON: Optional[float] = pydantic.Field(default=None)
+    MAGNESIUM: Optional[float] = pydantic.Field(default=None)
+    NIACIN: Optional[float] = pydantic.Field(default=None)
+    PHOSPHORUS: Optional[float] = pydantic.Field(default=None)
+    POTASSIUM: Optional[float] = pydantic.Field(default=None)
+    RIBOFLAVIN: Optional[float] = pydantic.Field(default=None)
+    SODIUM: Optional[float] = pydantic.Field(default=None)
+    SUGAR_ALCOHOLS: Optional[float] = pydantic.Field(default=None)
+    SUGARS_ADDED: Optional[float] = pydantic.Field(default=None)
+    SUGARS: Optional[float] = pydantic.Field(default=None)
+    THIAMIN: Optional[float] = pydantic.Field(default=None)
+    VITAMIN_A_RAE: Optional[float] = pydantic.Field(default=None)
+    VITAMIN_B12: Optional[float] = pydantic.Field(default=None)
+    VITAMIN_B6: Optional[float] = pydantic.Field(default=None)
+    VITAMIN_C: Optional[float] = pydantic.Field(default=None)
+    VITAMIN_D: Optional[float] = pydantic.Field(default=None)
+    VITAMIN_E: Optional[float] = pydantic.Field(default=None)
+    VITAMIN_K: Optional[float] = pydantic.Field(default=None)
+    WATER: Optional[float] = pydantic.Field(default=None)
+    ZINC: Optional[float] = pydantic.Field(default=None)
 
 
 class FoodsInSearchResponse(core.schemas.ResponseBase):
     class _OrganizedFoods(core.schemas.SchemaBase):
-        suggested: list[FoodEdamam] = pydantic.Field(...)
-        all: list[FoodEdamam] = pydantic.Field(...)
+        suggested: list[FoodBase] = pydantic.Field(...)
+        all: list[FoodBase] = pydantic.Field(...)
 
     data: _OrganizedFoods = pydantic.Field(...)
 
@@ -121,7 +121,12 @@ class IngredientsInRequest(pydantic.BaseModel):
 
 
 class NutrientsInResponse(core.schemas.ResponseBase):
-    data: dict[str, Any] = pydantic.Field(...)
+    class _OrganizedNutrients(core.schemas.SchemaBase):
+        nutrients: NutrientsFull = pydantic.Field(...)
+        health_labels: list[str] = pydantic.Field(default=[])
+        cautions: list[str] = pydantic.Field(default=[])
+
+    data: _OrganizedNutrients = pydantic.Field(...)
 
 
 class FoodIdsInResponse(core.schemas.ResponseBase): ...
