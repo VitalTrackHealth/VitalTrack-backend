@@ -5,6 +5,7 @@ FastAPI backend application initialization.
 from contextlib import asynccontextmanager
 
 import fastapi
+from fastapi.middleware import cors
 
 from vitaltrack import config
 from vitaltrack import core
@@ -26,6 +27,17 @@ async def lifespan(app: fastapi.FastAPI):
 
 
 app = fastapi.FastAPI(lifespan=lifespan)
+
+# TODO: Tighten this up
+origins = ["*"]
+
+app.add_middleware(
+    cors.CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.include_router(user.router.router, prefix="/user", tags=["user"])
 app.include_router(provider.router.router, prefix="/provider", tags=["provider"])
