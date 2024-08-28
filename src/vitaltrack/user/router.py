@@ -117,6 +117,22 @@ async def login_user(
     return {"message": "login successful", "data": {}}
 
 
+@router.post("/update", response_model=schemas.UserUpdateResponse)
+async def update_user(
+    user: schemas.UserInUpdate,
+    db_manager: core.dependencies.database_manager_dep,
+):
+    user_in_req_dict = user.model_dump()
+
+    user_in_db = await services.update_user(
+        db_manager, {"email": user_in_req_dict["email"]}, user_in_req_dict
+    )
+    if not user_in_db:
+        raise fastapi.HTTPException(status_code=400, detail="email not found")
+
+    return {"message": f"{user_in_db.email} updated", "data": user_in_db.model_dump()}
+
+
 @router.get(
     "/profile",
     response_model=schemas.UserProfileResponse,

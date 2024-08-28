@@ -5,6 +5,7 @@ User schemas for data validation.
 from __future__ import annotations
 
 from typing import Any
+from typing import Optional
 
 import pydantic
 
@@ -29,8 +30,8 @@ class UserBase(core.schemas.SchemaBase):
     last_name: str = pydantic.Field(...)
     phone_number: str = pydantic.Field(...)
     email: pydantic.EmailStr = pydantic.Field(...)
-    conditions: list[str] = pydantic.Field(...)
     body_measurements: BodyMeasurements = pydantic.Field()
+    conditions: Optional[list[str]] = pydantic.Field(default=[])
 
 
 class BodyMeasurements(core.schemas.SchemaBase):
@@ -56,7 +57,7 @@ class UserInRegister(UserBase):
     """
 
     password: str = pydantic.Field(...)
-    provider_code: str = pydantic.Field(...)
+    provider_code: Optional[str] = pydantic.Field(defaut=None)
 
 
 class UserRegisterResponse(core.schemas.ResponseBase):
@@ -77,4 +78,11 @@ class UserInLogin(core.schemas.SchemaBase):
 
 
 class UserLoginResponse(core.schemas.ResponseBase):
-    data: dict[str, Any] = pydantic.Field(...)
+    data: UserBase = pydantic.Field(...)
+
+
+class UserInUpdate(UserInRegister): ...
+
+
+class UserUpdateResponse(core.schemas.ResponseBase):
+    data: UserBase = pydantic.Field(...)
