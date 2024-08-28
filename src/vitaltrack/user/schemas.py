@@ -19,7 +19,6 @@ class UserBase(core.schemas.SchemaBase):
     Attributes:
         first_name: The first name of the user.
         last_name: The last name of the user.
-        username: The username of the user.
         phone_number: The phone number of the user.
         email: The email address of the user.
         provider: A list of strings representing the providers associated with the user.
@@ -28,7 +27,6 @@ class UserBase(core.schemas.SchemaBase):
 
     first_name: str = pydantic.Field(...)
     last_name: str = pydantic.Field(...)
-    username: str = pydantic.Field(...)
     phone_number: str = pydantic.Field(...)
     email: pydantic.EmailStr = pydantic.Field(...)
     conditions: list[str] = pydantic.Field(...)

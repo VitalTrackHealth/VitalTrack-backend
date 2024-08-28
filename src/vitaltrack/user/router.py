@@ -32,7 +32,7 @@ async def register_user(
 
     Args:
         user: The user data provided in the request body.
-            This includes user details such as username, email, etc.
+            This includes user details such as email, etc.
         db_manager: Dependency injection for the database manager
             used to connect to the MongoDB database and perform operations.
 
@@ -97,7 +97,7 @@ async def login_user(
 
     Args:
         user: The user data provided in the request body.
-            This includes user details such as username, email, etc.
+            This includes user details such as email, etc.
         db_manager: Dependency injection for the database manager
             used to connect to the MongoDB database and perform operations.
 
