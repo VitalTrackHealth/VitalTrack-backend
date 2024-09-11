@@ -10,4 +10,3 @@
 ```py
 pdm run dev
 ```
-Contributor test.
