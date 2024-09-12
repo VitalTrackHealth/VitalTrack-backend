@@ -11,6 +11,10 @@ API_V1_STR = "/api/v1"
 
 dotenv.load_dotenv()
 
+SECRET_KEY = os.getenv("SECRET_KEY")
+ALGORITHM = os.getenv("ALGORITHM")
+ACCESS_TOKEN_EXPIRE_MINUTES = os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES")
+
 MONGO_DB_USER = os.getenv("MONGO_DB_USER")
 MONGO_DB_PASSWORD = os.getenv("MONGO_DB_PASSWORD")
 

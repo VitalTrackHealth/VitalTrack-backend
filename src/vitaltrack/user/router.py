@@ -27,19 +27,7 @@ async def register_user(
     user: schemas.UserInRegister,
     db_manager: core.dependencies.database_manager_dep,
 ):
-    """
-    Register a new user in the database.
-
-    Args:
-        user: The user data provided in the request body.
-            This includes user details such as email, etc.
-        db_manager: Dependency injection for the database manager
-            used to connect to the MongoDB database and perform operations.
-
-    Returns:
-        TODO: Add return
-    """
-    user_in_req_dict = user.model_dump()
+    user_in_req_dict = user.model_dump(exclude_none=True)
 
     user_already_exists = await services.get_user(
         db_manager, {"email": user_in_req_dict["email"]}
@@ -60,14 +48,15 @@ async def register_user(
     provider_in_db = await provider.services.get_provider(
         db_manager, {"provider_code": user_in_req_dict["provider_code"]}
     )
-    if not provider_in_db:
-        raise fastapi.HTTPException(status_code=400, detail="provider code not found")
+    provider_in_db_id_list = []
+    if provider_in_db:
+        provider_in_db_id_list.append(provider_in_db.id)
 
     new_user = models.UserInDB(
         id=uuid.uuid4(),
         password_hash=password_hash,
         salt=salt,
-        provider=[provider_in_db.id],
+        provider=provider_in_db_id_list,
         **user_in_req_dict,
     )
 
@@ -75,9 +64,10 @@ async def register_user(
         new_user.model_dump(by_alias=True)
     )
 
-    await db_manager.db[config.PROVIDERS_COLLECTION_NAME].update_one(
-        {"_id": provider_in_db.id}, {"$addToSet": {"users": new_user.id}}
-    )
+    if provider_in_db:
+        await db_manager.db[config.PROVIDERS_COLLECTION_NAME].update_one(
+            {"_id": provider_in_db.id}, {"$addToSet": {"users": new_user.id}}
+        )
 
     # TODO: Verify database save success
 
@@ -92,18 +82,6 @@ async def login_user(
     user: schemas.UserInLogin,
     db_manager: core.dependencies.database_manager_dep,
 ):
-    """
-    Authenticate and login.
-
-    Args:
-        user: The user data provided in the request body.
-            This includes user details such as email, etc.
-        db_manager: Dependency injection for the database manager
-            used to connect to the MongoDB database and perform operations.
-
-    Returns:
-        TODO: Add return
-    """
     user_in_req_dict = user.model_dump()
 
     user_in_db = await services.get_user(
@@ -122,7 +100,7 @@ async def update_user(
     user: schemas.UserInUpdate,
     db_manager: core.dependencies.database_manager_dep,
 ):
-    user_in_req_dict = user.model_dump()
+    user_in_req_dict = user.model_dump(exclude_unset=True, exclude_none=True)
 
     user_in_db = await services.update_user(
         db_manager, {"email": user_in_req_dict["email"]}, user_in_req_dict

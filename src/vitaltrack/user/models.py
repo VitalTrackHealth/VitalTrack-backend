@@ -16,18 +16,6 @@ from vitaltrack import food
 
 
 class UserInDB(core.models.ModelInDBBase, core.models.AuthMixin):
-    """
-    User collection for Mongo.
-
-    Attributes:
-        id: The unique identifier for the user.
-        first_name: The first name of the user.
-        last_name: The last name of the user.
-        phone_number: The phone number of the user.
-        email: The email address of the user.
-        provider: A list of strings representing the providers associated with the user.
-    """
-
     id: uuid.UUID = pydantic.Field(alias="_id")
     first_name: str = pydantic.Field(...)
     last_name: str = pydantic.Field(...)

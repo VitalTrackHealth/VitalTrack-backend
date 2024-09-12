@@ -14,29 +14,19 @@ from vitaltrack import food
 
 
 class UserBase(core.schemas.SchemaBase):
-    """
-    Base model for user information.
-
-    Attributes:
-        first_name: The first name of the user.
-        last_name: The last name of the user.
-        phone_number: The phone number of the user.
-        email: The email address of the user.
-        provider: A list of strings representing the providers associated with the user.
-        conditions: Conditions a user has.
-    """
-
     first_name: str = pydantic.Field(...)
     last_name: str = pydantic.Field(...)
     phone_number: str = pydantic.Field(...)
     email: pydantic.EmailStr = pydantic.Field(...)
-    body_measurements: BodyMeasurements = pydantic.Field()
+    body_measurements: Optional[BodyMeasurements] = pydantic.Field(
+        default_factory=lambda: BodyMeasurements()
+    )
     conditions: Optional[list[str]] = pydantic.Field(default=[])
 
 
 class BodyMeasurements(core.schemas.SchemaBase):
-    height: float = pydantic.Field(description="Height in centimeters")
-    weight: float = pydantic.Field(description="Weight in kilograms")
+    height: float = pydantic.Field(default=0.0, description="Height in centimeters")
+    weight: float = pydantic.Field(default=0.0, description="Weight in kilograms")
 
 
 class UserProfile(UserBase):
@@ -49,15 +39,8 @@ class UserProfileResponse(core.schemas.ResponseBase):
 
 
 class UserInRegister(UserBase):
-    """
-    User model for handling user data when registering.
-
-    Attributes:
-        password: Unhashed password of the user.
-    """
-
     password: str = pydantic.Field(...)
-    provider_code: Optional[str] = pydantic.Field(defaut=None)
+    provider_code: Optional[str] = pydantic.Field(default="")
 
 
 class UserRegisterResponse(core.schemas.ResponseBase):
@@ -65,14 +48,6 @@ class UserRegisterResponse(core.schemas.ResponseBase):
 
 
 class UserInLogin(core.schemas.SchemaBase):
-    """
-    User model for handling user data when at login.
-
-    Attributes:
-        email: Email of the user.
-        password: Unhashed password of the user.
-    """
-
     email: pydantic.EmailStr = pydantic.Field(...)
     password: str = pydantic.Field(...)
 
@@ -81,7 +56,15 @@ class UserLoginResponse(core.schemas.ResponseBase):
     data: UserBase = pydantic.Field(...)
 
 
-class UserInUpdate(UserInRegister): ...
+class UserInUpdate(core.schemas.SchemaBase):
+    email: pydantic.EmailStr = pydantic.Field(...)
+    first_name: Optional[str] = pydantic.Field(default="")
+    last_name: Optional[str] = pydantic.Field(default="")
+    phone_number: Optional[str] = pydantic.Field(default="")
+    body_measurements: Optional[BodyMeasurements] = pydantic.Field(default={})
+    conditions: Optional[list[str]] = pydantic.Field(default=[])
+    password: Optional[str] = pydantic.Field(default="")
+    provider_code: Optional[str] = pydantic.Field(default="")
 
 
 class UserUpdateResponse(core.schemas.ResponseBase):
