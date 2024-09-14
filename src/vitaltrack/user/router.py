@@ -4,7 +4,7 @@ User endpoints.
 
 from __future__ import annotations
 
-import uuid
+import traceback
 from typing import Annotated
 
 import fastapi
@@ -13,9 +13,8 @@ import pydantic
 from vitaltrack import config
 from vitaltrack import core
 from vitaltrack import food
-from vitaltrack import provider
 
-from . import models
+from . import dependencies
 from . import schemas
 from . import services
 
@@ -24,91 +23,39 @@ router = fastapi.APIRouter()
 
 @router.post("/register", response_model=schemas.UserRegisterResponse)
 async def register_user(
-    user: schemas.UserInRegister,
     db_manager: core.dependencies.database_manager_dep,
+    user: schemas.UserRegisterRequest,
 ):
-    user_in_req_dict = user.model_dump(exclude_none=True)
-
-    user_already_exists = await services.get_user(
-        db_manager, {"email": user_in_req_dict["email"]}
-    )
-    if user_already_exists:
+    try:
+        registered_user = await services.register_user(db_manager, user)
+        if not registered_user:
+            raise fastapi.HTTPException(
+                status_code=fastapi.status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to register user",
+            )
+        return {"user": registered_user.model_dump()}
+    except ValueError as e:
         raise fastapi.HTTPException(
-            status_code=400, detail="user with this email already exists"
+            status_code=fastapi.status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=str(e),
         )
-
-    # Generate user password hash
-    salt = core.utils.generate_salt()
-    password_hash = core.utils.get_password_hash(
-        user_in_req_dict.pop("password").encode("utf-8"),
-        salt,
-    )
-
-    # Add Provider relationship
-    provider_in_db = await provider.services.get_provider(
-        db_manager, {"provider_code": user_in_req_dict["provider_code"]}
-    )
-    provider_in_db_id_list = []
-    if provider_in_db:
-        provider_in_db_id_list.append(provider_in_db.id)
-
-    new_user = models.UserInDB(
-        id=uuid.uuid4(),
-        password_hash=password_hash,
-        salt=salt,
-        provider=provider_in_db_id_list,
-        **user_in_req_dict,
-    )
-
-    result = await db_manager.db[config.USERS_COLLECTION_NAME].insert_one(
-        new_user.model_dump(by_alias=True)
-    )
-
-    if provider_in_db:
-        await db_manager.db[config.PROVIDERS_COLLECTION_NAME].update_one(
-            {"_id": provider_in_db.id}, {"$addToSet": {"users": new_user.id}}
-        )
-
-    # TODO: Verify database save success
-
-    return {
-        "message": f"{user_in_req_dict['email']} registered",
-        "data": user_in_req_dict,
-    }
-
-
-@router.post("/login", response_model=schemas.UserLoginResponse)
-async def login_user(
-    user: schemas.UserInLogin,
-    db_manager: core.dependencies.database_manager_dep,
-):
-    user_in_req_dict = user.model_dump()
-
-    user_in_db = await services.get_user(
-        db_manager, {"email": user_in_req_dict["email"]}
-    )
-    if not user_in_db or not user_in_db.check_password(user_in_req_dict["password"]):
-        raise fastapi.HTTPException(
-            status_code=400, detail="incorrect email or password"
-        )
-
-    return {"message": "login successful", "data": {}}
 
 
 @router.post("/update", response_model=schemas.UserUpdateResponse)
 async def update_user(
-    user: schemas.UserInUpdate,
+    current_user: dependencies.user_authenticate_dep,
     db_manager: core.dependencies.database_manager_dep,
+    update_user: schemas.UserUpdateRequest,
 ):
-    user_in_req_dict = user.model_dump(exclude_unset=True, exclude_none=True)
-
     user_in_db = await services.update_user(
-        db_manager, {"email": user_in_req_dict["email"]}, user_in_req_dict
+        db_manager, {"username": current_user.username}, update_user
     )
     if not user_in_db:
-        raise fastapi.HTTPException(status_code=400, detail="email not found")
-
-    return {"message": f"{user_in_db.email} updated", "data": user_in_db.model_dump()}
+        raise fastapi.HTTPException(
+            status_code=fastapi.status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to update user",
+        )
+    return {"user": user_in_db.model_dump()}
 
 
 @router.get(

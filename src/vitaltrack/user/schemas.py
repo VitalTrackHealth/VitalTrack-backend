@@ -5,23 +5,29 @@ User schemas for data validation.
 from __future__ import annotations
 
 from typing import Any
-from typing import Optional
 
 import pydantic
 
 from vitaltrack import core
 from vitaltrack import food
 
+################################################################################
+# Base Schemas
+################################################################################
+
 
 class UserBase(core.schemas.SchemaBase):
-    first_name: str = pydantic.Field(...)
-    last_name: str = pydantic.Field(...)
-    phone_number: str = pydantic.Field(...)
-    email: pydantic.EmailStr = pydantic.Field(...)
-    body_measurements: Optional[BodyMeasurements] = pydantic.Field(
+    username: str = pydantic.Field(description="Email")
+    first_name: str = pydantic.Field(default="")
+    last_name: str = pydantic.Field(default="")
+    email: pydantic.EmailStr = pydantic.Field()
+    phone_number: str = pydantic.Field(default="")
+    providers: list[str] = pydantic.Field(default=[])
+
+    body_measurements: BodyMeasurements = pydantic.Field(
         default_factory=lambda: BodyMeasurements()
     )
-    conditions: Optional[list[str]] = pydantic.Field(default=[])
+    conditions: list[str] = pydantic.Field(default=[])
 
 
 class BodyMeasurements(core.schemas.SchemaBase):
@@ -34,38 +40,40 @@ class UserProfile(UserBase):
     goals: dict[str, Any] = pydantic.Field(default={})
 
 
-class UserProfileResponse(core.schemas.ResponseBase):
-    data: UserProfile = pydantic.Field(...)
+################################################################################
+# Request Schemas
+################################################################################
 
 
-class UserInRegister(UserBase):
+class UserRegisterRequest(UserBase):
     password: str = pydantic.Field(...)
-    provider_code: Optional[str] = pydantic.Field(default="")
+
+
+class UserUpdateRequest(UserBase):
+    # Redefines fields to make optional
+    username: str = pydantic.Field(description="Email", default="")
+    email: pydantic.EmailStr = pydantic.Field(default="")
+    provider_code: str = pydantic.Field(default="")
+    password: str = pydantic.Field(default="")
+
+
+################################################################################
+# Response Schemas
+################################################################################
 
 
 class UserRegisterResponse(core.schemas.ResponseBase):
-    data: UserBase = pydantic.Field(...)
-
-
-class UserInLogin(core.schemas.SchemaBase):
-    email: pydantic.EmailStr = pydantic.Field(...)
-    password: str = pydantic.Field(...)
+    user: UserBase = pydantic.Field(...)
 
 
 class UserLoginResponse(core.schemas.ResponseBase):
-    data: UserBase = pydantic.Field(...)
-
-
-class UserInUpdate(core.schemas.SchemaBase):
-    email: pydantic.EmailStr = pydantic.Field(...)
-    first_name: Optional[str] = pydantic.Field(default="")
-    last_name: Optional[str] = pydantic.Field(default="")
-    phone_number: Optional[str] = pydantic.Field(default="")
-    body_measurements: Optional[BodyMeasurements] = pydantic.Field(default={})
-    conditions: Optional[list[str]] = pydantic.Field(default=[])
-    password: Optional[str] = pydantic.Field(default="")
-    provider_code: Optional[str] = pydantic.Field(default="")
+    access_token: str = pydantic.Field(...)
+    token_type: str = pydantic.Field(...)
 
 
 class UserUpdateResponse(core.schemas.ResponseBase):
-    data: UserBase = pydantic.Field(...)
+    user: UserBase = pydantic.Field(...)
+
+
+class UserProfileResponse(core.schemas.ResponseBase):
+    user: UserProfile = pydantic.Field(...)

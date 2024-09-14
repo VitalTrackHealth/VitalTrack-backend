@@ -5,6 +5,8 @@ Global models interactions with MongoDB.
 """
 
 import pydantic
+import uuid
+from typing import Literal
 
 from . import utils
 
@@ -13,7 +15,9 @@ class ModelInDBBase(pydantic.BaseModel):
     model_config = pydantic.ConfigDict(populate_by_name=True)
 
 
-class AuthMixin(pydantic.BaseModel):
+class AuthenticatedEntity(pydantic.BaseModel):
+    id: uuid.UUID = pydantic.Field(alias="_id")
+    username: str = pydantic.Field(...)
     salt: bytes = pydantic.Field(...)
     password_hash: bytes = pydantic.Field(...)
 

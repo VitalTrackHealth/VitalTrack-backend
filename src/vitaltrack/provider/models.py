@@ -13,7 +13,7 @@ import pydantic
 from vitaltrack import core
 
 
-class ProviderInDB(core.models.ModelInDBBase, core.models.AuthMixin):
+class ProviderInDB(core.models.ModelInDBBase, core.models.AuthenticatedEntity):
     id: uuid.UUID = pydantic.Field(alias="_id")
     first_name: str = pydantic.Field(...)
     last_name: str = pydantic.Field(...)

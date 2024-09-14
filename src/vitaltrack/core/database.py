@@ -27,6 +27,11 @@ class DatabaseManager:
     def connect_to_database(self, db_name: str):
         self.db = self.client[db_name]
 
+    async def get_collection(
+        self, collection: str
+    ) -> motor_asyncio.AsyncIOMotorCollection:
+        return self.db[collection]
+
 
 async def get_database_manager() -> DatabaseManager:
     return global_db_manager
