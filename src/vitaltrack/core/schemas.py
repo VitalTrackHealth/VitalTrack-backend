@@ -30,7 +30,7 @@ class Token(pydantic.BaseModel):
 
 class TokenData(pydantic.BaseModel):
     username: str = pydantic.Field(default="")
-    entity_type: Literal["user", "provider"] = pydantic.Field(default="")
+    entity_type: Literal["patient", "provider"] = pydantic.Field(default="")
 
 
 ################################################################################

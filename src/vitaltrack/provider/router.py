@@ -11,7 +11,7 @@ import pydantic
 
 from vitaltrack import config
 from vitaltrack import core
-from vitaltrack import user
+from vitaltrack import patient
 
 from . import models
 from . import schemas
@@ -34,7 +34,7 @@ async def register_provider(
     )
     if provider_already_exists:
         raise fastapi.HTTPException(
-            status_code=400, detail="user with this email already exists"
+            status_code=400, detail="provider with this email already exists"
         )
 
     # Generate provider password hash
@@ -118,9 +118,13 @@ async def profile(
         raise fastapi.HTTPException(status_code=400, detail="incorrect email")
 
     patient_list = []
-    for user_id in provider_in_db.users:
-        user_in_db = await user.services.get_user(db_manager, {"_id": user_id})
-        patient_list.append(user.schemas.UserProfile(**user_in_db.model_dump()))
+    for patient_id in provider_in_db.patients:
+        patient_in_db = await patient.services.get_patient(
+            db_manager, {"_id": patient_id}
+        )
+        patient_list.append(
+            patient.schemas.PatientProfile(**patient_in_db.model_dump())
+        )
 
     return {
         "message": f"{len(patient_list)} patient(s) found",

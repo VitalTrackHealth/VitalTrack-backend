@@ -2,7 +2,6 @@
 Core router.
 """
 
-import traceback
 from typing import Annotated
 
 import fastapi

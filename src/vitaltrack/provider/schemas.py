@@ -9,7 +9,7 @@ from typing import Any
 import pydantic
 
 from vitaltrack import core
-from vitaltrack import user
+from vitaltrack import patient
 
 
 class ProviderBase(core.schemas.SchemaBase):
@@ -45,4 +45,4 @@ class ProviderLoginResponse(core.schemas.ResponseBase):
 
 
 class PatientsListResponse(core.schemas.ResponseBase):
-    data: list[user.schemas.UserProfile] = pydantic.Field(...)
+    data: list[patient.schemas.PatientProfile] = pydantic.Field(...)

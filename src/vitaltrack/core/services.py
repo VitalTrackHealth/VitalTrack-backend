@@ -14,17 +14,19 @@ async def authenticate_entity(
     username: str,
     password: str,
 ) -> str | None:
-    # Try to authenticate as a user
-    user_collection = await db_manager.get_collection(config.USERS_COLLECTION_NAME)
-    user = await user_collection.find_one({"username": username})
-    if user:
-        user_model = models.AuthenticatedEntity(**user)
-        if user_model.check_password(password):
+    # Try to authenticate as a patient
+    patient_collection = await db_manager.get_collection(
+        config.PATIENTS_COLLECTION_NAME
+    )
+    patient = await patient_collection.find_one({"username": username})
+    if patient:
+        patient_model = models.AuthenticatedEntity(**patient)
+        if patient_model.check_password(password):
             return utils.create_access_token(
-                data={"sub": user_model.username, "entity_type": "user"}
+                data={"sub": patient_model.username, "entity_type": "patient"}
             )
 
-    # If not a user, try to authenticate as a provider
+    # If not a patient, try to authenticate as a provider
     provider_collection = await db_manager.get_collection(
         config.PROVIDERS_COLLECTION_NAME
     )

@@ -1,5 +1,5 @@
 """
-User schemas for data validation.
+Patient schemas for data validation.
 """
 
 from __future__ import annotations
@@ -16,7 +16,7 @@ from vitaltrack import food
 ################################################################################
 
 
-class UserBase(core.schemas.SchemaBase):
+class PatientBase(core.schemas.SchemaBase):
     username: str = pydantic.Field(description="Email")
     first_name: str = pydantic.Field(default="")
     last_name: str = pydantic.Field(default="")
@@ -35,7 +35,7 @@ class BodyMeasurements(core.schemas.SchemaBase):
     weight: float = pydantic.Field(default=0.0, description="Weight in kilograms")
 
 
-class UserProfile(UserBase):
+class PatientProfile(PatientBase):
     foods: list[food.models.FoodInDB] = pydantic.Field(default=[])
     goals: dict[str, Any] = pydantic.Field(default={})
 
@@ -45,11 +45,11 @@ class UserProfile(UserBase):
 ################################################################################
 
 
-class UserRegisterRequest(UserBase):
+class PatientRegisterRequest(PatientBase):
     password: str = pydantic.Field(...)
 
 
-class UserUpdateRequest(UserBase):
+class PatientUpdateRequest(PatientBase):
     # Redefines fields to make optional
     username: str = pydantic.Field(description="Email", default="")
     email: pydantic.EmailStr = pydantic.Field(default="")
@@ -62,18 +62,18 @@ class UserUpdateRequest(UserBase):
 ################################################################################
 
 
-class UserRegisterResponse(core.schemas.ResponseBase):
-    user: UserBase = pydantic.Field(...)
+class PatientRegisterResponse(core.schemas.ResponseBase):
+    patient: PatientBase = pydantic.Field(...)
 
 
-class UserLoginResponse(core.schemas.ResponseBase):
+class PatientLoginResponse(core.schemas.ResponseBase):
     access_token: str = pydantic.Field(...)
     token_type: str = pydantic.Field(...)
 
 
-class UserUpdateResponse(core.schemas.ResponseBase):
-    user: UserBase = pydantic.Field(...)
+class PatientUpdateResponse(core.schemas.ResponseBase):
+    patient: PatientBase = pydantic.Field(...)
 
 
-class UserProfileResponse(core.schemas.ResponseBase):
-    user: UserProfile = pydantic.Field(...)
+class PatientProfileResponse(core.schemas.ResponseBase):
+    patient: PatientProfile = pydantic.Field(...)

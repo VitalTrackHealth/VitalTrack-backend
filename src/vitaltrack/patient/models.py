@@ -1,5 +1,5 @@
 """
-User models interactions with MongoDB.
+Patient models interactions with MongoDB.
 
 'InDB' is add to class names to add more distinction from schemas.
 """
@@ -13,7 +13,7 @@ from vitaltrack import core
 from vitaltrack import food
 
 
-class UserInDB(core.models.ModelInDBBase, core.models.AuthenticatedEntity):
+class PatientInDB(core.models.ModelInDBBase, core.models.AuthenticatedEntity):
     first_name: str = pydantic.Field(default="")
     last_name: str = pydantic.Field(default="")
     email: pydantic.EmailStr = pydantic.Field(default="")

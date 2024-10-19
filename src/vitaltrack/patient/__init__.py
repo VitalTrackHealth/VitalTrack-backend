@@ -1,5 +1,5 @@
 """
-User module.
+Patient module.
 """
 
 from . import models

@@ -20,4 +20,4 @@ class ProviderInDB(core.models.ModelInDBBase, core.models.AuthenticatedEntity):
     email: pydantic.EmailStr = pydantic.Field(...)
     phone_number: str = pydantic.Field(...)
     provider_code: str = pydantic.Field(...)
-    users: list[uuid.UUID] = pydantic.Field(default=[])
+    patients: list[uuid.UUID] = pydantic.Field(default=[])
