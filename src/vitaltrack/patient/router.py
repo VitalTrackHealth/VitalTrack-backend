@@ -4,7 +4,6 @@ Patient endpoints.
 
 from __future__ import annotations
 
-import traceback
 from typing import Annotated
 
 import fastapi
@@ -33,7 +32,7 @@ async def register_patient(
                 status_code=fastapi.status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Failed to register patient",
             )
-        return {"patient": registered_patient.model_dump()}
+        return {"data": registered_patient.model_dump()}
     except ValueError as e:
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -55,7 +54,7 @@ async def update_patient(
             status_code=fastapi.status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to update patient",
         )
-    return {"patient": patient_in_db.model_dump()}
+    return {"data": patient_in_db.model_dump()}
 
 
 @router.get(
@@ -74,7 +73,7 @@ async def profile(
             status_code=fastapi.status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to get patient",
         )
-    return {"patient": patient_in_db.model_dump()}
+    return {"data": patient_in_db.model_dump()}
 
 
 @router.post(

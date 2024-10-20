@@ -26,6 +26,9 @@ class PatientInDB(core.models.ModelInDBBase, core.models.AuthenticatedEntity):
     )
     foods: list[food.models.FoodInDB] = pydantic.Field(default=[])
     favorites: list[str] = pydantic.Field(default=[])
+    nutrition_goals: NutritionGoals = pydantic.Field(
+        default_factory=lambda: NutritionGoals()
+    )
 
     disabled: bool = pydantic.Field(default=False)
 
@@ -33,3 +36,10 @@ class PatientInDB(core.models.ModelInDBBase, core.models.AuthenticatedEntity):
 class BodyMeasurements(core.models.ModelInDBBase):
     height: float = pydantic.Field(default=0, description="Height in centimeters")
     weight: float = pydantic.Field(default=0, description="Weight in kilograms")
+
+
+class NutritionGoals(core.models.ModelInDBBase):
+    calorie: int = pydantic.Field(default=2000, description="Calorie goal")
+    protein: int = pydantic.Field(default=150, description="Protein goal")
+    fat: int = pydantic.Field(default=65, description="Fat goal")
+    carbs: int = pydantic.Field(default=200, description="Carbs goal")

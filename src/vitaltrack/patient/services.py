@@ -11,7 +11,7 @@ from pymongo import ReturnDocument
 
 from vitaltrack import config
 from vitaltrack import core
-
+from vitaltrack import provider
 from . import models
 from . import schemas
 
@@ -41,14 +41,27 @@ async def register_patient(
         salt,
     )
 
+    provider_in_db = None
+    if patient.provider_code:
+        provider_in_db = await provider.services.get_provider(
+            db_manager, {"provider_code": patient.provider_code}
+        )
+
     new_patient = models.PatientInDB(
         id=uuid.uuid4(),
         password_hash=password_hash,
         salt=salt,
         disabled=False,
-        **patient.model_dump(exclude={"password"}),
+        providers=[provider_in_db.id] if provider_in_db else [],
+        **patient.model_dump(exclude={"password", "provider_code"}),
     )
     result = await patients_collection.insert_one(new_patient.model_dump(by_alias=True))
+
+    if provider_in_db:
+        await db_manager.db[config.PROVIDERS_COLLECTION_NAME].update_one(
+            {"_id": provider_in_db.id}, {"$addToSet": {"patients": new_patient.id}}
+        )
+
     if result.inserted_id:
         return new_patient
 

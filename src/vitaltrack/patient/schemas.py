@@ -4,7 +4,7 @@ Patient schemas for data validation.
 
 from __future__ import annotations
 
-from typing import Any
+import uuid
 
 import pydantic
 
@@ -22,7 +22,6 @@ class PatientBase(core.schemas.SchemaBase):
     last_name: str = pydantic.Field(default="")
     email: pydantic.EmailStr = pydantic.Field()
     phone_number: str = pydantic.Field(default="")
-    providers: list[str] = pydantic.Field(default=[])
 
     body_measurements: BodyMeasurements = pydantic.Field(
         default_factory=lambda: BodyMeasurements()
@@ -35,9 +34,19 @@ class BodyMeasurements(core.schemas.SchemaBase):
     weight: float = pydantic.Field(default=0.0, description="Weight in kilograms")
 
 
+class NutritionGoals(core.schemas.SchemaBase):
+    calorie: int = pydantic.Field(default=2000, description="Calorie goal")
+    protein: int = pydantic.Field(default=150, description="Protein goal")
+    fat: int = pydantic.Field(default=65, description="Fat goal")
+    carbs: int = pydantic.Field(default=200, description="Carbs goal")
+
+
 class PatientProfile(PatientBase):
+    providers: list[uuid.UUID] = pydantic.Field(default=[])
     foods: list[food.models.FoodInDB] = pydantic.Field(default=[])
-    goals: dict[str, Any] = pydantic.Field(default={})
+    nutrition_goals: NutritionGoals = pydantic.Field(
+        default_factory=lambda: NutritionGoals()
+    )
 
 
 ################################################################################
@@ -47,13 +56,13 @@ class PatientProfile(PatientBase):
 
 class PatientRegisterRequest(PatientBase):
     password: str = pydantic.Field(...)
+    provider_code: str = pydantic.Field(default="")
 
 
 class PatientUpdateRequest(PatientBase):
     # Redefines fields to make optional
     username: str = pydantic.Field(description="Email", default="")
     email: pydantic.EmailStr = pydantic.Field(default="")
-    provider_code: str = pydantic.Field(default="")
     password: str = pydantic.Field(default="")
 
 
@@ -63,7 +72,7 @@ class PatientUpdateRequest(PatientBase):
 
 
 class PatientRegisterResponse(core.schemas.ResponseBase):
-    patient: PatientBase = pydantic.Field(...)
+    data: PatientBase = pydantic.Field(...)
 
 
 class PatientLoginResponse(core.schemas.ResponseBase):
@@ -72,8 +81,8 @@ class PatientLoginResponse(core.schemas.ResponseBase):
 
 
 class PatientUpdateResponse(core.schemas.ResponseBase):
-    patient: PatientBase = pydantic.Field(...)
+    data: PatientBase = pydantic.Field(...)
 
 
 class PatientProfileResponse(core.schemas.ResponseBase):
-    patient: PatientProfile = pydantic.Field(...)
+    data: PatientProfile = pydantic.Field(...)

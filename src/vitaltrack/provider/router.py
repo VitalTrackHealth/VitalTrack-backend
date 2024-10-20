@@ -9,14 +9,12 @@ import uuid
 import fastapi
 import pydantic
 
-from vitaltrack import config
 from vitaltrack import core
 from vitaltrack import patient
 
-from . import models
+from . import dependencies
 from . import schemas
 from . import services
-from . import utils
 
 
 router = fastapi.APIRouter()
@@ -24,67 +22,39 @@ router = fastapi.APIRouter()
 
 @router.post("/register", response_model=schemas.ProviderRegisterResponse)
 async def register_provider(
-    provider: schemas.ProviderInRegister,
     db_manager: core.dependencies.database_manager_dep,
+    provider: schemas.ProviderRegisterRequest,
 ):
-    provider_in_req_dict = provider.model_dump()
-
-    provider_already_exists = await services.get_provider(
-        db_manager, {"email": provider_in_req_dict["email"]}
-    )
-    if provider_already_exists:
+    try:
+        registered_provider = await services.register_provider(db_manager, provider)
+        if not registered_provider:
+            raise fastapi.HTTPException(
+                status_code=fastapi.status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to register provider",
+            )
+        return {"data": registered_provider.model_dump()}
+    except ValueError as e:
         raise fastapi.HTTPException(
-            status_code=400, detail="provider with this email already exists"
+            status_code=fastapi.status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=str(e),
         )
 
-    # Generate provider password hash
-    salt = core.generate_salt()
-    password_hash = core.get_password_hash(
-        provider_in_req_dict.pop("password").encode("utf-8"),
-        salt,
-    )
 
-    # Generate unique provider code
-    provider_code = await utils.generate_provider_code(db_manager)
-
-    new_provider = models.ProviderInDB(
-        id=uuid.uuid4(),
-        password_hash=password_hash,
-        salt=salt,
-        provider_code=provider_code,
-        **provider_in_req_dict,
-    )
-
-    result = await db_manager.db[config.PROVIDERS_COLLECTION_NAME].insert_one(
-        new_provider.model_dump(by_alias=True)
-    )
-
-    # TODO: Verify database save success
-
-    return {
-        "message": f"{provider_in_req_dict['email']} registered",
-        "data": {"provider_code": provider_code, **provider_in_req_dict},
-    }
-
-
-@router.post("/login", response_model=schemas.ProviderLoginResponse)
-async def login_provider(
-    provider: schemas.ProviderInLogin,
+@router.post("/update", response_model=schemas.ProviderUpdateResponse)
+async def update_provider(
+    current_provider: dependencies.provider_authenticate_dep,
     db_manager: core.dependencies.database_manager_dep,
+    update_provider: schemas.ProviderUpdateRequest,
 ):
-    provider_in_req_dict = provider.model_dump()
-
-    provider_in_db = await services.get_provider(
-        db_manager, {"email": provider_in_req_dict["email"]}
+    provider_in_db = await services.update_provider(
+        db_manager, {"email": current_provider.email}, update_provider
     )
-    if not provider_in_db or not provider_in_db.check_password(
-        provider_in_req_dict["password"]
-    ):
+    if not provider_in_db:
         raise fastapi.HTTPException(
-            status_code=400, detail="incorrect email or password"
+            status_code=fastapi.status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to update provider",
         )
-
-    return {"message": "login successful", "data": {}}
+    return {"data": provider_in_db.model_dump()}
 
 
 @router.get(
@@ -92,17 +62,37 @@ async def login_provider(
     response_model=schemas.ProviderProfileResponse,
 )
 async def profile(
-    email: pydantic.EmailStr,
+    current_provider: dependencies.provider_authenticate_dep,
     db_manager: core.dependencies.database_manager_dep,
 ):
-    provider_in_db = await services.get_provider(db_manager, {"email": email})
+    provider_in_db = await services.get_provider(
+        db_manager, {"email": current_provider.email}
+    )
     if not provider_in_db:
-        raise fastapi.HTTPException(status_code=400, detail="incorrect email")
+        raise fastapi.HTTPException(
+            status_code=fastapi.status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to get provider",
+        )
+    return {"data": provider_in_db.model_dump()}
 
-    return {
-        "message": "",
-        "data": provider_in_db.model_dump(),
-    }
+
+@router.get(
+    "/check-provider-code",
+    response_model=schemas.ProviderCodeCheckResponse,
+)
+async def check_provider_code(
+    provider_code: str,
+    db_manager: core.dependencies.database_manager_dep,
+):
+    provider_in_db = await services.get_provider(
+        db_manager, {"provider_code": provider_code}
+    )
+    if not provider_in_db:
+        raise fastapi.HTTPException(
+            status_code=fastapi.status.HTTP_404_NOT_FOUND,
+            detail="Provider code is invalid",
+        )
+    return {"message": "Provider code is valid"}
 
 
 @router.get(
@@ -110,12 +100,17 @@ async def profile(
     response_model=schemas.PatientsListResponse,
 )
 async def profile(
-    email: pydantic.EmailStr,
+    current_provider: dependencies.provider_authenticate_dep,
     db_manager: core.dependencies.database_manager_dep,
 ):
-    provider_in_db = await services.get_provider(db_manager, {"email": email})
+    provider_in_db = await services.get_provider(
+        db_manager, {"email": current_provider.email}
+    )
     if not provider_in_db:
-        raise fastapi.HTTPException(status_code=400, detail="incorrect email")
+        raise fastapi.HTTPException(
+            status_code=fastapi.status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to get provider",
+        )
 
     patient_list = []
     for patient_id in provider_in_db.patients:
