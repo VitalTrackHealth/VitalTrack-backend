@@ -5,6 +5,7 @@ Patient schemas for data validation.
 from __future__ import annotations
 
 import uuid
+from typing import Any
 
 import pydantic
 
@@ -66,6 +67,15 @@ class PatientUpdateRequest(PatientBase):
     password: str = pydantic.Field(default="")
 
 
+class PatientAddFoodRequest(core.schemas.SchemaBase):
+    class _PatientAddFoodRequestItem(core.schemas.SchemaBase):
+        food_id: str = pydantic.Field(...)
+        food_name: str = pydantic.Field(...)
+        details: dict[str, Any] = pydantic.Field(default={})
+
+    foods: list[_PatientAddFoodRequestItem] = pydantic.Field(...)
+
+
 ################################################################################
 # Response Schemas
 ################################################################################
@@ -86,3 +96,8 @@ class PatientUpdateResponse(core.schemas.ResponseBase):
 
 class PatientProfileResponse(core.schemas.ResponseBase):
     data: PatientProfile = pydantic.Field(...)
+
+
+class PatientFoodLogResponse(core.schemas.ResponseBase):
+    # TODO: Abnormal, should call a schema not a model
+    data: list[food.models.FoodInDB] = pydantic.Field(...)

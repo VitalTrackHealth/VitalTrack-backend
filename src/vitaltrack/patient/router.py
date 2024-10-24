@@ -81,21 +81,46 @@ async def profile(
     response_model=food.schemas.FoodIdsInResponse,
 )
 async def add_food(
-    email: Annotated[pydantic.EmailStr, fastapi.Body()],
-    food_ids: Annotated[list[str], fastapi.Body()],
+    current_patient: dependencies.patient_authenticate_dep,
+    request: schemas.PatientAddFoodRequest,
     db_manager: core.dependencies.database_manager_dep,
 ):
-    foods = [food.models.FoodInDB(food_id=food_id).model_dump() for food_id in food_ids]
-    result = await db_manager.db[config.PATIENTS_COLLECTION_NAME].update_one(
-        {"email": email}, {"$push": {"foods": {"$each": foods}}}
+    patient_in_db = await services.get_patient(
+        db_manager, {"username": current_patient.username}
+    )
+    foods_to_insert = [
+        food.models.FoodInDB(
+            food_id=food_to_insert.food_id,
+            food_name=food_to_insert.food_name,
+            patient_id=patient_in_db.id,
+            details=food_to_insert.details,
+        ).model_dump()
+        for food_to_insert in request.foods
+    ]
+
+    result = await db_manager.db[config.FOOD_COLLECTION_NAME].insert_many(
+        foods_to_insert
     )
 
-    if result.matched_count == 0:
-        raise fastapi.HTTPException(
-            status_code=400, detail="no patient with email found"
-        )
-
     return {
-        "message": f"{result.modified_count} food(s) added",
-        "data": {},
+        "message": f"{len(result.inserted_ids)} food(s) added",
+        "data": {"inserted_ids": [str(id) for id in result.inserted_ids]},
     }
+
+
+@router.get("/food-log", response_model=schemas.PatientFoodLogResponse)
+async def food_log(
+    current_patient: dependencies.patient_authenticate_dep,
+    db_manager: core.dependencies.database_manager_dep,
+):
+    patient_in_db = await services.get_patient(
+        db_manager, {"username": current_patient.username}
+    )
+
+    food_log = await food.services.get_food_log(
+        db_manager, {"patient_id": patient_in_db.id}
+    )
+    if not food_log:
+        food_log = []
+
+    return {"data": food_log}

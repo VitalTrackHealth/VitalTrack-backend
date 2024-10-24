@@ -4,13 +4,12 @@ Provider endpoints.
 
 from __future__ import annotations
 
-import uuid
 
 import fastapi
-import pydantic
 
 from vitaltrack import core
 from vitaltrack import patient
+from vitaltrack import food
 
 from . import dependencies
 from . import schemas
@@ -125,3 +124,24 @@ async def profile(
         "message": f"{len(patient_list)} patient(s) found",
         "data": patient_list,
     }
+
+
+@router.get(
+    "/food-log/{patient_email}",
+    response_model=patient.schemas.PatientFoodLogResponse,
+)
+async def patient_food_log(
+    patient_email: str,
+    db_manager: core.dependencies.database_manager_dep,
+):
+    patient_in_db = await patient.services.get_patient(
+        db_manager, {"username": patient_email}
+    )
+
+    food_log = await food.services.get_food_log(
+        db_manager, {"patient_id": patient_in_db.id}
+    )
+    if not food_log:
+        food_log = []
+
+    return {"data": food_log}
