@@ -2,6 +2,8 @@
 Database initialization and utility module.
 """
 
+import ssl
+
 from motor import motor_asyncio
 
 from vitaltrack import config
@@ -17,6 +19,8 @@ class DatabaseManager:
             minPoolSize=config.MIN_CONNECTIONS_COUNT,
             maxPoolSize=config.MAX_CONNECTIONS_COUNT,
             uuidRepresentation="standard",
+            # !Remove
+            ssl_cert_reqs=ssl.CERT_NONE,
         )
         if db_name:
             self.db = self.client[db_name]
