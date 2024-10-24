@@ -20,7 +20,7 @@ class DatabaseManager:
             maxPoolSize=config.MAX_CONNECTIONS_COUNT,
             uuidRepresentation="standard",
             # !Remove
-            ssl_cert_reqs=ssl.CERT_NONE,
+            tlsAllowInvalidCertificates=True,
         )
         if db_name:
             self.db = self.client[db_name]
