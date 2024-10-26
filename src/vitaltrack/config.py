@@ -7,8 +7,6 @@ import os
 import dotenv
 
 
-API_V1_STR = "/api/v1"
-
 dotenv.load_dotenv()
 
 SECRET_KEY = os.getenv("SECRET_KEY")
