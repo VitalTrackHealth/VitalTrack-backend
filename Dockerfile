@@ -28,4 +28,4 @@ COPY . .
 EXPOSE 8000
 
 # Command to run the application
-CMD ["pdm", "run", "dev", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["pdm", "run", "prd", "--host", "0.0.0.0", "--port", "8000"]

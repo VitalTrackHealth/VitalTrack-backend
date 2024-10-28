@@ -36,6 +36,6 @@ lint = [
 dev = """
     fastapi dev src/vitaltrack/main.py
 """
-prod =  """
+prd =  """
     fastapi run src/vitaltrack/main.py
 """
