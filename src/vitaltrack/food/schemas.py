@@ -129,4 +129,6 @@ class NutrientsInResponse(core.schemas.ResponseBase):
     data: _OrganizedNutrients = pydantic.Field(...)
 
 
-class FoodIdsInResponse(core.schemas.ResponseBase): ...
+class FoodIdsInResponse(core.schemas.ResponseBase):
+    message: str = pydantic.Field(...)
+    data: dict[str, Any] = pydantic.Field(...)

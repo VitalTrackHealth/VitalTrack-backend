@@ -9,7 +9,6 @@ from typing import Any
 import pydantic
 
 from vitaltrack import core
-from vitaltrack import patient
 
 ################################################################################
 # Base Schemas
@@ -67,7 +66,7 @@ class ProviderCodeCheckResponse(core.schemas.ResponseBase):
 
 
 class PatientsListResponse(core.schemas.ResponseBase):
-    data: list[patient.schemas.PatientProfile] = pydantic.Field(...)
+    data: list[dict[str, Any]] = pydantic.Field(...)
 
 
 class ProviderProfileResponse(core.schemas.ResponseBase):

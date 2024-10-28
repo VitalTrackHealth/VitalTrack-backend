@@ -6,7 +6,6 @@ Global models interactions with MongoDB.
 
 import pydantic
 import uuid
-from typing import Literal
 
 from . import utils
 

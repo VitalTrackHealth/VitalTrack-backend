@@ -10,7 +10,6 @@ import uuid
 import pydantic
 
 from vitaltrack import core
-from vitaltrack import food
 
 
 class PatientInDB(core.models.ModelInDBBase, core.models.AuthenticatedEntity):
@@ -24,7 +23,6 @@ class PatientInDB(core.models.ModelInDBBase, core.models.AuthenticatedEntity):
     body_measurements: BodyMeasurements = pydantic.Field(
         default_factory=lambda: BodyMeasurements()
     )
-    foods: list[food.models.FoodInDB] = pydantic.Field(default=[])
     favorites: list[str] = pydantic.Field(default=[])
     nutrition_goals: NutritionGoals = pydantic.Field(
         default_factory=lambda: NutritionGoals()

@@ -4,7 +4,6 @@ Patient schemas for data validation.
 
 from __future__ import annotations
 
-import uuid
 from typing import Any
 
 import pydantic
@@ -43,8 +42,7 @@ class NutritionGoals(core.schemas.SchemaBase):
 
 
 class PatientProfile(PatientBase):
-    providers: list[uuid.UUID] = pydantic.Field(default=[])
-    foods: list[food.models.FoodInDB] = pydantic.Field(default=[])
+    providers: list[dict[str, Any]] = pydantic.Field(default=[])
     nutrition_goals: NutritionGoals = pydantic.Field(
         default_factory=lambda: NutritionGoals()
     )
@@ -60,7 +58,7 @@ class PatientRegisterRequest(PatientBase):
     provider_code: str = pydantic.Field(default="")
 
 
-class PatientUpdateRequest(PatientBase):
+class PatientUpdateRequest(PatientProfile):
     # Redefines fields to make optional
     username: str = pydantic.Field(description="Email", default="")
     email: pydantic.EmailStr = pydantic.Field(default="")
@@ -74,6 +72,17 @@ class PatientAddFoodRequest(core.schemas.SchemaBase):
         details: dict[str, Any] = pydantic.Field(default={})
 
     foods: list[_PatientAddFoodRequestItem] = pydantic.Field(...)
+
+
+class PatientDeleteFoodRequest(core.schemas.SchemaBase):
+    class _PatientDeleteFoodRequestItem(core.schemas.SchemaBase):
+        food_object_id: str = pydantic.Field(...)
+
+    foods: list[_PatientDeleteFoodRequestItem] = pydantic.Field(...)
+
+
+class PatientAddProviderRequest(core.schemas.SchemaBase):
+    provider_code: str = pydantic.Field(...)
 
 
 ################################################################################
@@ -101,3 +110,7 @@ class PatientProfileResponse(core.schemas.ResponseBase):
 class PatientFoodLogResponse(core.schemas.ResponseBase):
     # TODO: Abnormal, should call a schema not a model
     data: list[food.models.FoodInDB] = pydantic.Field(...)
+
+
+class PatientAddProviderResponse(core.schemas.ResponseBase):
+    data: dict[str, Any] = pydantic.Field(...)

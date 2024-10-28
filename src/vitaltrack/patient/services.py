@@ -113,18 +113,15 @@ async def add_provider_to_patient(
         {"$addToSet": {"providers": provider_id}},
         return_document=ReturnDocument.AFTER,
     )
-    if result.upserted_id:
-        return models.PatientInDB(**result)
 
-    #     # Add Provider relationship
-    # provider_in_db = await provider.services.get_provider(
-    #     db_manager, {"provider_code": user_in_req_dict["provider_code"]}
-    # )
-    # provider_in_db_id_list = []
-    # if provider_in_db:
-    #     provider_in_db_id_list.append(provider_in_db.id)
+    # Add Provider relationship
+    provider_in_db = await provider.services.get_provider(
+        db_manager, {"_id": provider_id}
+    )
 
-    # if provider_in_db:
-    #     await db_manager.db[config.PROVIDERS_COLLECTION_NAME].update_one(
-    #         {"_id": provider_in_db.id}, {"$addToSet": {"users": new_user.id}}
-    #     )
+    if provider_in_db:
+        await db_manager.db[config.PROVIDERS_COLLECTION_NAME].update_one(
+            {"_id": provider_in_db.id}, {"$addToSet": {"patients": patient_id}}
+        )
+
+    return models.PatientInDB(**result)
