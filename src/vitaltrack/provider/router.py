@@ -117,7 +117,9 @@ async def profile(
             db_manager, {"_id": patient_id}
         )
         patient_list.append(
-            patient.schemas.PatientProfile(**patient_in_db.model_dump())
+            patient.schemas.PatientProfile(
+                **patient_in_db.model_dump(exclude={"providers"})
+            ).model_dump()
         )
 
     return {
